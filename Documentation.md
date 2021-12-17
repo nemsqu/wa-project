@@ -32,7 +32,7 @@ Installation guide
 5. Run "npm run build".
 6. Run "npm install".
 7. Run "npm start".
-8. Open your browser to http://localhost:1234
+8. Wait for the server to start and pen your browser to http://localhost:1234
 9. Enjoy.
 
 **In case of problems**
