@@ -44,14 +44,14 @@ function App() {
         let data;
         try{
             data = await response.json();
+            setSnippets(data);
+            setLoading(false);
+            if(localStorage.getItem("token")){
+              setLoggedin(true);
+            }
         } catch (e) {
             console.log(e);
-            return;
-        }
-        setSnippets(data);
-        setLoading(false);
-        if(localStorage.getItem("token")){
-          setLoggedin(true);
+            setLoading(false);
         }
     }
     fetchData();
