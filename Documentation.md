@@ -16,10 +16,10 @@ The packages that were used to help were the following:
 
 
 For the back-end Node.js and Express were used because they work well together and they provide many useful features. Building an API with these two is straight-forward. In addition to these two, the following packages and technologies were used:
-* MongoDB and Mongoose for database usages. They are easy to use and provide great opportunities for creating different schemas for different use cases. Their variability as well as their easiness of use were the main reasons why this database set up was decided on.
+* MongoDB and Mongoose are used for database usage. They are easy to use and provide great opportunities for creating different schemas for different use cases. Their variability as well as their easiness of use were the main reasons why this database set up was decided on.
 * Passport.js is used for authentication together with JWT. JWT was used because of its compatibility with both the front and the back-end and Passport is a good, simple tool for checking the token when requests are made to the API.
 * dotenv is used to create the secret needed for encoding the token. Again, the choice was mostly made based on compatibility and ease of use.
-* cors is needed in order to have the client and the server running on different ports but still be able to communicate together. It was used for handling the API requests correctly.
+* cors is needed in order to have the client and the server running on different ports but still be able to communicate together. It was used for handling the API requests correctly during the development phase. It is not needed when running the application in production.
 * Various properties of Express-validator were used for, e.g. checking user input and escaping HTML code before the snippet posted by the user has been added to the database. This was for security reasons and Express-validator was efficient at doing so.
 
 Installation guide
