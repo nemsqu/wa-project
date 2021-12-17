@@ -1,17 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Tooltip from '@mui/material/Tooltip';
 import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
 import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded';
-import jwt_decode from "jwt-decode";
-import { useUser } from "../context/AuthContext";
 
-//TODO Everyone can vote only once
-export function VoteCounter({votes, id, canVote, onVote, type, setCanVote }){
+
+
+export function VoteCounterComponent({votes, id, canVote, onVote, type, user }){
     const [voteCount, setVoteCount] = useState(votes ? votes : 0);
     let red = voteCount < 0;
-    const user = jwt_decode(localStorage.getItem("token"));
-    const [userCanVote, setUserCanVote] = useState(canVote);
-    console.log(userCanVote);
+    const [userCanVote, setUserCanVote] = useState(canVote ? true : false);
+
+    useEffect(() => {
+        setUserCanVote(canVote);
+    }, [canVote])
     
 
     const handleVote = (amount) => {
@@ -19,6 +20,7 @@ export function VoteCounter({votes, id, canVote, onVote, type, setCanVote }){
         if(!userCanVote) {
             return;
         }
+        //deny further voting & add vote to snippet and user
         setUserCanVote(false);
         if(type === "comment"){
             fetch("/api/comment/vote/" + user.id + "/" + id + "/" + amount, {
@@ -30,13 +32,10 @@ export function VoteCounter({votes, id, canVote, onVote, type, setCanVote }){
                 mode: 'cors'
             }).then((response) => response.json())
             .then(data => {
-                console.log(data);
                 setVoteCount(data.votes);
-                setCanVote(false);
                 onVote();
             })
         } else {
-            console.log("/api/snippet/vote/" + user.id + "/" + id + "/" + amount);
             fetch("/api/snippet/vote/" + user.id + "/" + id + "/" + amount, {
                 method: "POST",
                 headers: {
@@ -46,10 +45,7 @@ export function VoteCounter({votes, id, canVote, onVote, type, setCanVote }){
                 mode: 'cors'
             }).then((response) => response.json())
             .then(data => {
-                console.log(data);
                 setVoteCount(data.votes);
-                console.log(data.previousVotes);
-                setCanVote(false);
                 onVote();
             })
         }

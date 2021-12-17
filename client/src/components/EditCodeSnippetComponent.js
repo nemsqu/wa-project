@@ -10,6 +10,7 @@ export function EditCodeSnippetComponent(){
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState("");
 
+    //get new snippet when page changes
     useEffect(() => {
         const getSnippet = async () =>{
             setLoading(true);
@@ -31,6 +32,7 @@ export function EditCodeSnippetComponent(){
         setSnippet({...snippet, [e.target.name]: e.target.value});
     }
 
+    //update snippet and show success/error message
     const onSubmit = () => {
         const token = localStorage.getItem("token");
         fetch("/api/snippet/" + id, {
@@ -41,7 +43,8 @@ export function EditCodeSnippetComponent(){
             },
             body: JSON.stringify({"content": snippet.content, "title": snippet.title}),
             mode: 'cors'
-          }).then((response) => response.json())
+          })
+          .then((response) => response.json())
           .then(data => {
               if(data.success){
                   setMessage(data.success);

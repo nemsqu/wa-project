@@ -1,6 +1,6 @@
 import { List, Pagination, Box, Stack } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { CustomListItem } from './CustomListItem';
+import { CustomListItemComponent } from './CustomListItemComponent';
 import jwt_decode from "jwt-decode";
 import { SearchFieldComponent } from './SearchFieldComponent';
 
@@ -14,20 +14,26 @@ export function ListComponent({ list, title, onClick, loading, type, placeholder
     const [previousVotes, setPreviousVotes] = useState();
     const [editIcons, setEditIcons] = useState(true);
     const [newVotes, setNewVotes] = useState(true);
-    const user = jwt_decode(localStorage.getItem("token"));
+    const token = localStorage.getItem("token");
+    let user = null;
+    if(token){
+        user = jwt_decode(token);
+    }
 
+    //set page and snippets when page is changed
     const handleChange = (e, value) => {
         setPage({...page, current: value});
         setSubList(filteredList.slice(0+value*10-10, 10+value*10-10));
     }
+
+    //update required number of pages and list per page
     useEffect(() =>{
         setPage({...page, max: Math.ceil(list.length/10)});
         setSubList(filteredList.slice(0+(page.current-1)*10, 9+(page.current-1)*10));
     }, [loading])
 
+    //update list of user's previous votes when new vote comes in
     useEffect(() => {
-        console.log("FIRED");
-        console.log(user);
         if(user){
             fetch("/api/" + user.id + "/votes")
             .then(response => response.json())
@@ -38,12 +44,14 @@ export function ListComponent({ list, title, onClick, loading, type, placeholder
         }
         setFilteredList(list);
         setFullList(list);
-    }, [newVotes])
+    }, [newVotes, loading])
 
+    //trigger checking previous votes
     const onVote = () => {
         setNewVotes(true);
     }
 
+    //check pagination need
     useEffect(() => {
         if(filteredList.length > 10){
             setPaginationNeeded(true);
@@ -51,7 +59,7 @@ export function ListComponent({ list, title, onClick, loading, type, placeholder
             setPaginationNeeded(false);
         }
         setSubList(filteredList.slice(0+(page.current-1)*10, 9+(page.current-1)*10));
-    }, [filteredList])
+    }, [filteredList, list])
 
     const toggleEditIcons = () => {
         setEditIcons(!editIcons);
@@ -59,12 +67,10 @@ export function ListComponent({ list, title, onClick, loading, type, placeholder
 
     const search = (text) => {
         if(text.length == 0){
-            console.log("moi");
             setFilteredList(fullList);
         } else {
             text = new RegExp(text, 'i');
             setFilteredList(filteredList.filter(element => {
-                console.log(element);
                 return element.content.match(text)}));
         }
     }
@@ -80,7 +86,7 @@ export function ListComponent({ list, title, onClick, loading, type, placeholder
                 {paginationNeeded && <Pagination count={page.max} page={page.current} onChange={handleChange} sx={{textAlign: 'center', width:'100%', justifyContent: 'center', display:'flex'}}/>}
                 {!loading && <List >
                     {subList.map((element) => {
-                    return <CustomListItem key={element._id} onClick={onClick} listElement={element} type={type} previousVotes={previousVotes} onVote={onVote} user={user} toggleEditIcons={toggleEditIcons} editIcons={editIcons} />;
+                    return <CustomListItemComponent user={user} key={element._id} onClick={onClick} listElement={element} type={type} previousVotes={previousVotes} onVote={onVote} user={user} toggleEditIcons={toggleEditIcons} editIcons={editIcons} />;
                     })}
                 {type === "code" && list.length === 0 && <p>No snippets yet.</p>}
                 </List>}

@@ -6,10 +6,10 @@ import { CommentAdditionComponent } from "./CommentAdditionComponent";
 import { CodeHiglightComponent } from "./CodeHighlightComponent";
 import EditIcon from '@mui/icons-material/Edit';
 import { Tooltip, Typography } from "@mui/material";
-import { useUser } from '../context/AuthContext';
+import jwt_decode from "jwt-decode";
 
 
-export function CodeSnippet(){
+export function CodeSnippetComponent(){
     let { id } = useParams();
     const [snippet, setSnippet] = useState("");
     const [comments, setComments] = useState([{}]);
@@ -17,8 +17,14 @@ export function CodeSnippet(){
     const token = localStorage.getItem("token");
     const [addingComment, setAddingComment] = useState(false);
     const [canEdit, setCanEdit] = useState(false);
-    const user = useUser();
+    const [user, setUser] = useState(null);
 
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        setUser(jwt_decode(token));
+    }, [])
+
+    //check if snippet is by current user
     useEffect(() => {
         if(snippet){
             if(user.name === snippet.authorName){
@@ -29,6 +35,7 @@ export function CodeSnippet(){
         }
     }, [snippet, user])
 
+    //get snippet and related comments
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
@@ -41,7 +48,7 @@ export function CodeSnippet(){
                 return;
             }
             setSnippet(data);
-            const commentsResponse = await fetch("/api/snippet/" + id + "/comments"); //siirrä tää listaan, että se haetaan aina sivua vaihtaessa tai siirrä sivuunvaihtoon liittyvä chekki tänne
+            const commentsResponse = await fetch("/api/snippet/" + id + "/comments");
             try{
                 data = await commentsResponse.json();
             } catch (e) {
@@ -54,10 +61,12 @@ export function CodeSnippet(){
         fetchData();
     }, [id])
 
+    //add new comment
     const onSubmit = (comment) => {
         setAddingComment(true);
-        let newComment = {"authorID": user.id, "authorName": user.name, "content": comment, "snippet": id, "_id": ""};
         const token = localStorage.getItem("token");
+        let newComment = {"authorID": user.id, "authorName": user.name, "content": comment, "snippet": id, "_id": ""};
+
         fetch("/api/comment/" + id, {
             method: "POST",
             headers: {
@@ -80,7 +89,6 @@ export function CodeSnippet(){
                     <Tooltip title="View profile">
                         <p onClick={() => window.location.href = "/user/" + snippet.authorName}>Author: {snippet.authorName}</p>
                     </Tooltip>
-                    <h3></h3>
                     </Box>
                     <Box sx={{maxWidth: '100vw', height: '100%', marginBottom: "50px"}}>
                        <CodeHiglightComponent code={snippet.content}/> 

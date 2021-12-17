@@ -1,23 +1,22 @@
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { FrontPage }from './components/FrontPage'
+import { FrontPageComponent }from './components/FrontPageComponent'
 import { My404Component } from './components/My404Component';
 import { ListComponent } from './components/ListComponent';
-import { Header } from './components/Header';
+import { HeaderComponent } from './components/HeaderComponent';
 import { useState, useEffect } from 'react';
-import { CodeSnippet } from './components/CodeSnippet';
-import { LoginForm } from './components/LoginForm';
-import { RegisterForm } from './components/RegisterForm';
+import { CodeSnippetComponent } from './components/CodeSnippetComponent';
+import { LoginFormComponent } from './components/LoginFormComponent';
+import { RegisterFormComponent } from './components/RegisterFormComponent';
 import { SnippetAdditionComponent } from './components/SnippetAdditionComponent';
-import jwt_decode from "jwt-decode";
 import { ProfileComponent } from './components/ProfileComponent';
 import { ViewProfileComponent } from './components/ViewProfileComponent';
 import { EditCodeSnippetComponent } from './components/EditCodeSnippetComponent';
 import { useUpdateUser, useUser } from './context/AuthContext';
+import jwt_decode from 'jwt-decode';
 
 function App() {
-  //const {token, setToken} = useContext(AuthContext);
-  //const setToken = useToggleLoggedIn;
+
   const [snippets, setSnippets] = useState([]);
   const [amount, setAmount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -26,16 +25,14 @@ function App() {
   let user = useUser(); 
 
   const logout = () => {
-    console.log("loging out");
-    if(window.location.href = "/edit/profile"){
-      window.location.href = "/"
-    }
+    window.location.href = "/"
     localStorage.removeItem("token");
     setLoggedin(false);
     updateUser();
   }
 
 
+  //get snippets when app mounts and when snippets are added
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -47,7 +44,6 @@ function App() {
             console.log(e);
             return;
         }
-        console.log(data);
         setSnippets(data);
         setLoading(false);
         if(localStorage.getItem("token")){
@@ -55,18 +51,19 @@ function App() {
         }
     }
     fetchData();
-}, [])
+}, [amount])
 
-  const onSubmitCode = (e) => {
-    e.preventDefault();
+  //getting data from form and sending to the database
+  const onSubmitCode = (snippet) => {
     const token = localStorage.getItem("token");
+    const user = jwt_decode(token);
     fetch("/api/snippet", {
       method: "POST",
       headers: {
         "Content-type": "application/json",
         "Authorization": "Bearer " + token
       },
-      body: JSON.stringify({"authorID": user.id, "authorName": user.name, "content": e.target.input.value, "title": e.target.title.value}),
+      body: JSON.stringify({"authorID": user.id, "authorName": user.name, "content": snippet.input, "title": snippet.value}),
       mode: 'cors'
     }).then((response) => {
       console.log(response)
@@ -77,16 +74,16 @@ function App() {
 
   return (
     <Router>
-      <Header title={"Code snippet app"} onLogout={logout} loggedin={loggedin} />
+      <HeaderComponent title={"Code snippet app"} onLogout={logout} loggedin={loggedin} user={user} />
       <Routes>
-        <Route path="/" element={<FrontPage login={setLoggedin} />} />
-        <Route path="/add_snippet" element={<SnippetAdditionComponent onSubmit={onSubmitCode} loading={loading}/>} />
+        <Route path="/" element={<FrontPageComponent login={setLoggedin} />} />
+        <Route path="/add_snippet" element={<SnippetAdditionComponent onSubmitCode={onSubmitCode} loading={loading}/>} />
         <Route path="/list" element={<ListComponent list={snippets} />} />
-        <Route path="/login" element={<LoginForm />} />
-        <Route path="/register" element={<RegisterForm />} />
-        <Route path="/snippet/:id" element={<CodeSnippet user={user} />} />
+        <Route path="/login" element={<LoginFormComponent />} />
+        <Route path="/register" element={<RegisterFormComponent />} />
+        <Route path="/snippet/:id" element={<CodeSnippetComponent user={user} />} />
         <Route path="/snippet/:id/edit" element={<EditCodeSnippetComponent user={user} />} />
-        <Route path="/edit/profile" element={<ProfileComponent />}/>
+        <Route path="/edit/profile/:name" element={<ProfileComponent />}/>
         <Route path="/user/:name" element={<ViewProfileComponent />}/>
         <Route path="*" element={<My404Component />} />
       </Routes>

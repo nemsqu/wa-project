@@ -3,9 +3,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { AppBar, Stack } from '@mui/material';
 
-export function Header({ title, loggedin, onLogout }){
-
-    console.log(loggedin);
+export function HeaderComponent({ title, loggedin, onLogout, user }){
     
     return(
         <Box sx={{ flexGrow: 1, mb: 5}}>
@@ -15,7 +13,7 @@ export function Header({ title, loggedin, onLogout }){
                     <Box sx={{ flexGrow: 1 }}/>
                     {loggedin &&
                         <Stack direction={{xs: "column", sm: "row"}}>
-                            <Button sx={{margin: "2px"}}variant="contained" onClick={() => window.location.href = "/edit/profile"}>Profile</Button>
+                            <Button sx={{margin: "2px"}}variant="contained" onClick={() => window.location.href = "/edit/profile/" + user.name}>Profile</Button>
                             <Button sx={{margin: "2px"}} variant="contained" onClick={onLogout}>Logout</Button>
                         </Stack>
                     }

@@ -17,11 +17,13 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 app.use(passport.initialize());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+
+
+
 
 const mongoDB = "mongodb://localhost:27017/projectdb_2";
 mongoose.connect(mongoDB);
@@ -41,5 +43,6 @@ if(process.env.NODE_ENV === "production") {
     };
     app.use(cors(corsOptions));
 }
+
 
 module.exports = app;

@@ -1,33 +1,42 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router";
-import { useUser } from "../context/AuthContext";
 import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 export function ViewProfileComponent(){
     let { name } = useParams();
-    const user = useUser();
-    //const [user, setUser] = useState(useUser);
+    const [user, setUser] = useState();
     const [loading, setLoading] = useState(true);
     const [avatarSrc, setAvatarSrc] = useState("");
 
+    //get user infos
     useEffect(() => {
         setLoading(true);
         console.log(name);
-        fetch("/users/api/profile/" + name)
+        fetch("/users/api/avatar/" + name)
             .then(response => response.blob())
             .then(data => {
                 console.log(data);
                 if(!data.error){
                     setAvatarSrc(URL.createObjectURL(data));
                 }
-                //updateUser();
+            }
+        )
+        fetch("/users/api/" + name)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if(!data.error){
+                    setUser(data);
+                }
                 setLoading(false);
-            })
+            }
+        )
+
     }, [name])
 
-    console.log(avatarSrc);
+    
     return (<>
     {!loading && <Stack direction="column" textAlign="center" sx={{ alignItems: "center", my: 3}}>
             <h2>{user.name}</h2>

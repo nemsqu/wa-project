@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useUpdateUser } from '../context/AuthContext';
 
 
-export function LoginForm(){
+export function LoginFormComponent(){
     const [error, setError] = useState(null);
     const updateUser = useUpdateUser();
     const [inputs, setInputs] = useState({name: "", password: ""});
@@ -11,7 +11,6 @@ export function LoginForm(){
     const handleChange = (e) => {
       setError(null);
       setInputs({...inputs, [e.target.name]: e.target.value});
-      console.log(inputs);
     }
 
     const userLogin = (e) => {
@@ -29,12 +28,10 @@ export function LoginForm(){
       .then((data) => {
         console.log(data);
           if(data.token) {
-              console.log(data.token);
               localStorage.setItem("token", data.token);
               updateUser();
-              //window.location.href = '/';
+              window.location.href = '/';
           } else {
-              console.log("wtf");
               if(data.error) {
                 setError("Invalid credentials");
               } else {

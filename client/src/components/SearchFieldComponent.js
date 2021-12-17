@@ -7,10 +7,11 @@ export function SearchFieldComponent({ searchContents, placeholder }){
 
     const [searchInput, setSearchInput] = useState("");
 
-    //TODO: check if enter was pressed
     const handleChange = (e) => {
         setSearchInput(e.target.value);
     }
+
+    //send contents and empty field
     const onClick = (e) => {
         e.preventDefault();
         searchContents(searchInput);

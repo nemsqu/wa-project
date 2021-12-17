@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button, TextField, Box } from "@mui/material";
 
-export function RegisterForm(){
+export function RegisterFormComponent(){
     const [error, setError] = useState(null);
     const [inputs, setInputs] = useState({name: "", email: "", password: ""});
 
@@ -13,7 +13,7 @@ export function RegisterForm(){
     const userRegister = (e) => {
         e.preventDefault();
         setError(null);
-        
+        console.log(inputs);
         fetch("/users/api/register", {
           method: "POST",
           headers: {
@@ -24,19 +24,18 @@ export function RegisterForm(){
       })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data.passwordError);
           if(data.nameError) {
             setError(data.nameError);
           }else if(data.passwordError){
             setError(data.passwordError);
-          }else if(data.emailError){
+          }else if(data.uniqueError){
             setError(data.uniqueError);
           }else {
               window.location.href = '/login';
           }
         })
       }
-    console.log(error);
+
     return(
         <Box sx={{m: "10px"}}>
             <h3>Register</h3>

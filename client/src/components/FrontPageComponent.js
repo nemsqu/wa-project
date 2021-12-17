@@ -1,17 +1,17 @@
 import { Button } from '@mui/material';
 import { Box } from '@mui/system';
 import '../App.css';
-import { Addition } from './SnippetAdditionComponent';
 import { ListComponent } from './ListComponent';
 import { useState, useEffect } from 'react';
 
 
-export function FrontPage({login}){
+export function FrontPageComponent({login}){
 
     const token = localStorage.getItem("token");
     const [snippets, setSnippets] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    //get snippets the first time
     useEffect(() => {
         setLoading(true);
         if(localStorage.getItem("token")){
@@ -19,16 +19,15 @@ export function FrontPage({login}){
         }
         fetch("/api/snippets")
         .then(response => {
-            console.log(response);
             return response.json()})
         .then(data => {
-            console.log(data);
-            setSnippets(data);
-            setLoading(false);
+            if(!data.error){
+                setSnippets(data);
+                setLoading(false);
+            }
         })
     }, [])
 
-    console.log(loading);
 
     const onSampleClick = async (id) => {
         window.location.href="/snippet/" + id;

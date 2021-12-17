@@ -10,7 +10,6 @@ var passportFile = require('../passport.js');
 const multer = require('multer');
 const upload = multer({storage: multer.memoryStorage()});
 
-
 router.post('/api/login',
   (req, res, next) => {
     console.log(req.body);
@@ -159,7 +158,7 @@ router.post('/api/update/password/:id', passport.authenticate('jwt', { session: 
           return res.send("No comments found");
         }
       }))
-      
+
     });
   });
 });
@@ -182,7 +181,7 @@ router.post('/api/check/password', passport.authenticate('jwt', { session: false
   })
 });
 
-router.get('/api/profile/:name', (req, res) => {
+router.get('/api/avatar/:name', (req, res) => {
   User.findOne({name: req.params.name}, (err, user) => {
     if(err) {
       return res.status(404).send({'error': error});
@@ -202,15 +201,6 @@ router.get('/api/profile/:name', (req, res) => {
       return res.send({error: "No user found found"});
     }
   })
-});
-
-
-router.get('/users', (req, res, next) => {
-  User.find({}, (err, users) =>{
-    if(err) return next(err);
-    res.json({users});
-  })
-  
 });
 
 module.exports = router;

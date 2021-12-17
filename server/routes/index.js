@@ -15,8 +15,7 @@ router.get('/api/snippets', function(req, res, next) {
     if(snippets){
       return res.send(snippets);
     }else {
-      console.log("moi");
-      return res.send("No snippets found");
+      return res.send({error: "No snippets found"});
     }
   })
 });
@@ -25,10 +24,8 @@ router.post('/api/snippet', passport.authenticate('jwt', { session: false }), [
   check('content').escape(),
   check('title').escape(),
   ], function(req, res, next) {
-    console.log("täällä");
     const validationErrors = validationResult(req);
     if(!validationErrors.isEmpty){
-      console.log(validationErrors.array());
       return res.status(400).json({errors: validationErrors.array()})
     }
     new Snippet({
@@ -47,10 +44,8 @@ router.post('/api/snippet/:id', passport.authenticate('jwt', { session: false })
   check('content').escape(),
   check('title').escape(),
   ], function(req, res, next) {
-    console.log("täällä");
     const validationErrors = validationResult(req);
     if(!validationErrors.isEmpty){
-      console.log(validationErrors.array());
       return res.status(400).json({errors: validationErrors.array()})
     }
     const timeNow = Date(Date.now());
@@ -87,10 +82,8 @@ router.post('/api/comment/:code', passport.authenticate('jwt', { session: false 
 router.post('/api/comment/vote/:user/:comment/:votes', passport.authenticate('jwt', { session: false }), function(req, res, next) {
   Comment.findOneAndUpdate({_id: req.params.comment}, {votes: req.params.votes}, {new: true}, ((err, result) => {
     if(err) return res.send(err);
-    User.findOneAndUpdate({id: req.params.user}, {$push: {commentVotes: req.params.comment}}, {new: true}, (err, result) => {
+    User.findOneAndUpdate({_id: req.params.user}, {$push: {commentVotes: req.params.comment}}, {new: true}, (err, result) => {
       if(err) return res.send(err);
-      //return res.send("ok");
-    //res.redirect('users/api/comments/vote/' + req.params.user + "/" + req.params.comment);
     return res.json({votes: req.params.votes, previousVotes: {commentVotes: result.commentVotes, snippetVotes: result.snippetVotes}});});
   }));
 });
@@ -98,10 +91,8 @@ router.post('/api/comment/vote/:user/:comment/:votes', passport.authenticate('jw
 router.post('/api/snippet/vote/:user/:snippet/:votes', passport.authenticate('jwt', { session: false }), function(req, res, next) {
   Snippet.findOneAndUpdate({_id: req.params.snippet}, {votes: req.params.votes}, {new: true}, ((err, result) => {
     if(err) return res.send(err);
-    User.findOneAndUpdate({id: req.params.user}, {$push: {snippetVotes: req.params.snippet}}, {new: true}, (err, result) => {
+    User.findOneAndUpdate({_id: req.params.user}, {$push: {snippetVotes: req.params.snippet}}, {new: true}, (err, result) => {
       if(err) return res.send(err);
-      //return res.send("ok");
-    //res.redirect('users/api/comments/vote/' + req.params.user + "/" + req.params.comment);
     return res.json({votes: req.params.votes, previousVotes: {commentVotes: result.commentVotes, snippetVotes: result.snippetVotes}});});
   }));
 });

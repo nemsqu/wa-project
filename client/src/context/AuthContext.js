@@ -8,32 +8,29 @@ export const AuthContextDispatch = createContext(); //context for functions that
 export function AuthContextProvider({ children }){
 
     const [user, setUser] = useState("");
-    useEffect(() => {
+
+    //set user at the beginning if still logged in
+    /*useEffect(() => {
         const token = localStorage.getItem("token");
         if(token){
             const userID = jwt_decode(token).name;
-            console.log(userID);
             fetch("/users/api/" + userID)
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data);
                     setUser(data);
             })
         }
-    }, [])
+    }, [])*/
     
 
     const updateUser = () => {
-        console.log("haetaan");
         const token = localStorage.getItem("token");
-        console.log(token);
         if(token){
             const userID = jwt_decode(token).name;
             console.log(userID);
             fetch("/users/api/" + userID)
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data);
                     setUser(data);
                 })
         } else {
@@ -41,7 +38,7 @@ export function AuthContextProvider({ children }){
         }
     }
 
-    
+    //provide a way for other components to access methods and values
     return (
         <AuthContextDispatch.Provider value={updateUser}>
             <AuthContext.Provider value={user}>

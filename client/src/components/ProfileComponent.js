@@ -1,32 +1,33 @@
-import { useEffect, useState, useContext } from "react";
-import jwt_decode from "jwt-decode";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router";
 import { Box } from "@mui/system";
 import { Button, Divider, TextField, Avatar, Stack } from "@mui/material";
-import { useUpdateUser, useUser } from "../context/AuthContext";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import jwt_decode from 'jwt-decode';
 
-//TODO: add authentication check
+
 export function ProfileComponent(){
+    const { name } = useParams();
     const [userData, setUserData] = useState(null);
     const [success, setSuccess] = useState(null);
     const [error, setError] = useState(null);
     const [confirmError, setConfirmError] = useState(null);
     const [avatarSrc, setAvatarSrc] = useState("");
-    const user = useUser();
-    const updateUser = useUpdateUser();
-    if(localStorage.getItem("token") === null){
-        updateUser();
-    }
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        if(localStorage.getItem("token") != null){
+            setUser(jwt_decode(localStorage.getItem("token")));
+        }
+    }, [name])
 
     useEffect(() => {
         if(!user){
             return;
         }
-        console.log(user);
         fetch("/users/api/" + user.name)
         .then(response => response.json())
         .then(data => {
-            console.log(data);
             setUserData(data);
         })
     }, [user])
@@ -34,12 +35,13 @@ export function ProfileComponent(){
     const updateUserData = (e) => {
         e.preventDefault();
         const token = localStorage.getItem("token");
+
         const formData = new FormData();
         formData.append("name", e.target.name.value);
         formData.append("email", e.target.email.value);
         formData.append("bio", e.target.bio.value);
         formData.append("avatar", e.target.avatarUpload.files[0]);
-        console.log(formData);
+        
         fetch("/users/api/" + userData._id, {
             method: "POST",
             body: formData,
@@ -47,18 +49,17 @@ export function ProfileComponent(){
                 "Authorization": "Bearer " + token
             },
             mode: 'cors'
-          }).then((response) => response.json())
-          .then(data => {
-              console.log(data);
-              setSuccess(data);
-            fetch("/users/api/profile/" + userData.name)
-            .then(response => response.blob())
+          })
+            .then((response) => response.json())
             .then(data => {
-                console.log(data);
-                setAvatarSrc(URL.createObjectURL(data));
-                setUserData({...userData, "email": e.target.email.value, "bio": e.target.bio.value});
-                updateUser();
-            })
+            setSuccess(data);
+            fetch("/users/api/avatar/" + userData.name)
+                .then(response => response.blob())
+                .then(data => {
+                    setAvatarSrc(URL.createObjectURL(data));
+                    setUserData({...userData, "email": e.target.email.value, "bio": e.target.bio.value});
+                }
+            )
         })
     }
 
@@ -109,7 +110,7 @@ export function ProfileComponent(){
                 <h2>Profile information</h2>
                 <p>{success}</p>
                 <form onSubmit={updateUserData} >
-                    <TextField id="name" label="Username" margin="normal" defaultValue={userData.name} required></TextField><br/>
+                    <TextField id="name" label="Username" margin="normal" defaultValue={userData.name} required disabled></TextField><br/>
                     <TextField id="email" type="email" label="Email" margin="normal" helperText="Not visible to other users" defaultValue={userData.email} required></TextField><br/>
                     <Avatar component="div" src={avatarSrc} sx={{ width: "100px", height: "100px", mx: "auto"}} variant="circular">
                         <AccountCircleIcon sx={{ width: "100px", height: "100px"}} />
