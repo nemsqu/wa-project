@@ -1,11 +1,9 @@
 import { Button, TextField, Box } from "@mui/material";
 import { useState } from "react";
-import { useUpdateUser } from '../context/AuthContext';
 
 
-export function LoginFormComponent(){
+export function LoginFormComponent({ updateUser}){
     const [error, setError] = useState(null);
-    const updateUser = useUpdateUser();
     const [inputs, setInputs] = useState({name: "", password: ""});
 
     const handleChange = (e) => {
@@ -26,7 +24,6 @@ export function LoginFormComponent(){
       })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
           if(data.token) {
               localStorage.setItem("token", data.token);
               updateUser();

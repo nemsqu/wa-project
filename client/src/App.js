@@ -12,7 +12,6 @@ import { SnippetAdditionComponent } from './components/SnippetAdditionComponent'
 import { ProfileComponent } from './components/ProfileComponent';
 import { ViewProfileComponent } from './components/ViewProfileComponent';
 import { EditCodeSnippetComponent } from './components/EditCodeSnippetComponent';
-import { useUpdateUser, useUser } from './context/AuthContext';
 import jwt_decode from 'jwt-decode';
 
 function App() {
@@ -20,16 +19,21 @@ function App() {
   const [snippets, setSnippets] = useState([]);
   const [amount, setAmount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const updateUser = useUpdateUser();
   const [loggedin, setLoggedin] = useState(false);
-  let user = useUser(); 
+  const [user, setUser] = useState(null); 
 
   const logout = () => {
     window.location.href = "/"
     localStorage.removeItem("token");
     setLoggedin(false);
-    updateUser();
+    setUser(null);
   }
+
+  useEffect(() => {
+    if(localStorage.getItem("token")){
+      setUser(jwt_decode(localStorage.getItem("token")));
+    }
+  }, [])
 
 
   //get snippets when app mounts and when snippets are added
@@ -63,12 +67,15 @@ function App() {
         "Content-type": "application/json",
         "Authorization": "Bearer " + token
       },
-      body: JSON.stringify({"authorID": user.id, "authorName": user.name, "content": snippet.input, "title": snippet.value}),
+      body: JSON.stringify({"authorID": user.id, "authorName": user.name, "content": snippet.input, "title": snippet.title}),
       mode: 'cors'
     }).then((response) => {
-      console.log(response)
       setAmount(amount + 1);})
       window.location.href = "/";
+  }
+
+  const updateUser = () => {
+    setUser(jwt_decode(localStorage.getItem("token")));
   }
 
 
@@ -79,7 +86,7 @@ function App() {
         <Route path="/" element={<FrontPageComponent login={setLoggedin} />} />
         <Route path="/add_snippet" element={<SnippetAdditionComponent onSubmitCode={onSubmitCode} loading={loading}/>} />
         <Route path="/list" element={<ListComponent list={snippets} />} />
-        <Route path="/login" element={<LoginFormComponent />} />
+        <Route path="/login" element={<LoginFormComponent updateUser={updateUser} />} />
         <Route path="/register" element={<RegisterFormComponent />} />
         <Route path="/snippet/:id" element={<CodeSnippetComponent user={user} />} />
         <Route path="/snippet/:id/edit" element={<EditCodeSnippetComponent user={user} />} />

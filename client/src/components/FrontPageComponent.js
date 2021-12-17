@@ -26,7 +26,7 @@ export function FrontPageComponent({login}){
                 setLoading(false);
             }
         })
-    }, [])
+    }, [login])
 
 
     const onSampleClick = async (id) => {

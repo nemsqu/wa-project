@@ -10,9 +10,14 @@ export function VoteCounterComponent({votes, id, canVote, onVote, type, user }){
     let red = voteCount < 0;
     const [userCanVote, setUserCanVote] = useState(canVote ? true : false);
 
+    //non-authenticated users can never vote
     useEffect(() => {
-        setUserCanVote(canVote);
-    }, [canVote])
+        if(user === null){
+            setUserCanVote(false);
+        } else {
+            setUserCanVote(canVote);
+        }
+    }, [canVote, user])
     
 
     const handleVote = (amount) => {

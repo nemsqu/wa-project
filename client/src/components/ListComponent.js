@@ -28,9 +28,9 @@ export function ListComponent({ list, title, onClick, loading, type, placeholder
 
     //update required number of pages and list per page
     useEffect(() =>{
-        setPage({...page, max: Math.ceil(list.length/10)});
+        setPage({...page, max: Math.ceil(filteredList.length/10)});
         setSubList(filteredList.slice(0+(page.current-1)*10, 9+(page.current-1)*10));
-    }, [loading])
+    }, [loading, filteredList])
 
     //update list of user's previous votes when new vote comes in
     useEffect(() => {
@@ -38,13 +38,12 @@ export function ListComponent({ list, title, onClick, loading, type, placeholder
             fetch("/api/" + user.id + "/votes")
             .then(response => response.json())
             .then(data => {
-                console.log("new list haettu ");
                 setPreviousVotes(data);
             })
         }
         setFilteredList(list);
         setFullList(list);
-    }, [newVotes, loading])
+    }, [newVotes, loading, list])
 
     //trigger checking previous votes
     const onVote = () => {
@@ -66,7 +65,7 @@ export function ListComponent({ list, title, onClick, loading, type, placeholder
     }
 
     const search = (text) => {
-        if(text.length == 0){
+        if(text.length === 0){
             setFilteredList(fullList);
         } else {
             text = new RegExp(text, 'i');
@@ -86,7 +85,7 @@ export function ListComponent({ list, title, onClick, loading, type, placeholder
                 {paginationNeeded && <Pagination count={page.max} page={page.current} onChange={handleChange} sx={{textAlign: 'center', width:'100%', justifyContent: 'center', display:'flex'}}/>}
                 {!loading && <List >
                     {subList.map((element) => {
-                    return <CustomListItemComponent user={user} key={element._id} onClick={onClick} listElement={element} type={type} previousVotes={previousVotes} onVote={onVote} user={user} toggleEditIcons={toggleEditIcons} editIcons={editIcons} />;
+                    return <CustomListItemComponent user={user} key={element._id} onClick={onClick} listElement={element} type={type} previousVotes={previousVotes} onVote={onVote} toggleEditIcons={toggleEditIcons} editIcons={editIcons} />;
                     })}
                 {type === "code" && list.length === 0 && <p>No snippets yet.</p>}
                 </List>}

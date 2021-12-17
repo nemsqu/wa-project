@@ -20,13 +20,14 @@ export function CodeSnippetComponent(){
     const [user, setUser] = useState(null);
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        setUser(jwt_decode(token));
-    }, [])
+        if(token){
+            setUser(jwt_decode(token));
+        }
+    }, [token])
 
     //check if snippet is by current user
     useEffect(() => {
-        if(snippet){
+        if(snippet && user){
             if(user.name === snippet.authorName){
                 setCanEdit(true);
             } else {

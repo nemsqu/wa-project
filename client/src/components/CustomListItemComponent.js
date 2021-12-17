@@ -8,23 +8,27 @@ import Avatar from '@mui/material/Avatar';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 export function CustomListItemComponent({ user, listElement, onClick, type, previousVotes, onVote, toggleEditIcons, editIcons}){
+    const [avatarSrc, setAvatarSrc] = useState("");
     const [canEdit, setCanEdit] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [comment, setComment] = useState(listElement.content);
     const [element, setElement] = useState(listElement);
     const [edited, setEdited] = useState(listElement.edited);
-    const [avatarSrc, setAvatarSrc] = useState("");
     const [canVote, setCanVote] = useState(false);
-
-    console.log(listElement);
 
     //set avatar only ones the element has been mounted
     useEffect(() => {
+        let mounted = true;
         fetch("/users/api/avatar/" + listElement.authorName)
             .then(response => response.blob())
             .then(data => {
-                setAvatarSrc(URL.createObjectURL(data));
+                if(mounted){
+                    setAvatarSrc(URL.createObjectURL(data));
+                }
             })
+        return () => {
+            mounted = false;
+        }
     }, [listElement.authorName])
 
     useEffect(() => {
@@ -86,7 +90,7 @@ export function CustomListItemComponent({ user, listElement, onClick, type, prev
                 }
             }
         }
-    }, [previousVotes])
+    }, [previousVotes, element._id, type])
 
     const updatePreviousVotes = () => {
         onVote();

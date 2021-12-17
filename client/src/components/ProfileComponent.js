@@ -19,6 +19,14 @@ export function ProfileComponent(){
         if(localStorage.getItem("token") != null){
             setUser(jwt_decode(localStorage.getItem("token")));
         }
+        fetch("/users/api/avatar/" + name)
+            .then(response => response.blob())
+            .then(data => {
+                if(!data.error){
+                    setAvatarSrc(URL.createObjectURL(data));
+                }
+            }
+        )
     }, [name])
 
     useEffect(() => {
@@ -82,7 +90,7 @@ export function ProfileComponent(){
                   setError(data.error);
               } else {
                   const newPassword = e.target.newpassword.value;
-                  if(newPassword.localeCompare(e.target.confirmpassword.value) != 0){
+                  if(newPassword.localeCompare(e.target.confirmpassword.value) !== 0){
                       setConfirmError(true);
                   } else {
                     fetch("/users/api/update/password/" + userData._id, {

@@ -20,6 +20,7 @@ router.get('/api/snippets', function(req, res, next) {
   })
 });
 
+//post new snippet, escape HTML code
 router.post('/api/snippet', passport.authenticate('jwt', { session: false }), [
   check('content').escape(),
   check('title').escape(),
@@ -40,6 +41,7 @@ router.post('/api/snippet', passport.authenticate('jwt', { session: false }), [
     });
 });
 
+//modify snippet, escape HTML again
 router.post('/api/snippet/:id', passport.authenticate('jwt', { session: false }), [
   check('content').escape(),
   check('title').escape(),
@@ -56,6 +58,7 @@ router.post('/api/snippet/:id', passport.authenticate('jwt', { session: false })
     }));
 });
 
+//edit comment
 router.post('/api/edit/comment/:id', passport.authenticate('jwt', { session: false }), function(req, res, next) {
   const timeNow = Date(Date.now());
   const datetime = timeNow.slice().split("GMT");
@@ -65,6 +68,7 @@ router.post('/api/edit/comment/:id', passport.authenticate('jwt', { session: fal
     }));
 });
 
+//add a comment
 router.post('/api/comment/:code', passport.authenticate('jwt', { session: false }), function(req, res, next) {
   new Comment({
     authorID: req.body.authorID,
@@ -74,11 +78,11 @@ router.post('/api/comment/:code', passport.authenticate('jwt', { session: false 
     snippet: req.params.code
   }).save((err, result) => {
     if(err) return res.send(err);
-    console.log(result.id);
     return res.json({id: result.id});
   });
 });
 
+//add votes on comments, both to comment and to user
 router.post('/api/comment/vote/:user/:comment/:votes', passport.authenticate('jwt', { session: false }), function(req, res, next) {
   Comment.findOneAndUpdate({_id: req.params.comment}, {votes: req.params.votes}, {new: true}, ((err, result) => {
     if(err) return res.send(err);
@@ -88,6 +92,7 @@ router.post('/api/comment/vote/:user/:comment/:votes', passport.authenticate('jw
   }));
 });
 
+//add votes on snippets, both to snippet and to user
 router.post('/api/snippet/vote/:user/:snippet/:votes', passport.authenticate('jwt', { session: false }), function(req, res, next) {
   Snippet.findOneAndUpdate({_id: req.params.snippet}, {votes: req.params.votes}, {new: true}, ((err, result) => {
     if(err) return res.send(err);
@@ -97,6 +102,7 @@ router.post('/api/snippet/vote/:user/:snippet/:votes', passport.authenticate('jw
   }));
 });
 
+//get all comments of a snippet
 router.get('/api/snippet/:id/comments', function(req, res, next) {
   Comment.find({"snippet": req.params.id}, (err, comments) => {
     if(err) {
@@ -105,7 +111,7 @@ router.get('/api/snippet/:id/comments', function(req, res, next) {
     if(comments){
       return res.send(comments);
     }else {
-      return res.send("No comments found");
+      return res.send({error: "No comments found"});
     }
   })
 });
@@ -118,11 +124,12 @@ router.get('/api/snippet/:id', function(req, res, next) {
     if(snippet){
       return res.send(snippet);
     }else {
-      return res.send("The snippet was not found");
+      return res.send({error: "The snippet was not found"});
     }
   })
 });
 
+//get comments and snippets a gicen user has voted on
 router.get('/api/:id/votes', function(req, res, next) {
   User.findOne({"_id": req.params.id}, (err, user) => {
     if(err) {
@@ -131,7 +138,7 @@ router.get('/api/:id/votes', function(req, res, next) {
     if(user){
       return res.send({commentVotes: user.commentVotes, snippetVotes: user.snippetVotes});
     }else {
-      return res.send("Previous votes were not found");
+      return res.send({error: "Previous votes were not found"});
     }
   })
 });

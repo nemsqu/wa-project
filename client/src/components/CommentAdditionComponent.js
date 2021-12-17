@@ -6,7 +6,6 @@ export function CommentAdditionComponent({onSubmit, placeholder }){
     const [comment, setComment] = useState("");
 
     const handleChange = (e) => {
-        console.log(e.target.value);
         setComment(e.target.value);
     }
 

@@ -13,7 +13,6 @@ export function RegisterFormComponent(){
     const userRegister = (e) => {
         e.preventDefault();
         setError(null);
-        console.log(inputs);
         fetch("/users/api/register", {
           method: "POST",
           headers: {

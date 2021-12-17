@@ -13,11 +13,9 @@ export function ViewProfileComponent(){
     //get user infos
     useEffect(() => {
         setLoading(true);
-        console.log(name);
         fetch("/users/api/avatar/" + name)
             .then(response => response.blob())
             .then(data => {
-                console.log(data);
                 if(!data.error){
                     setAvatarSrc(URL.createObjectURL(data));
                 }
@@ -26,7 +24,6 @@ export function ViewProfileComponent(){
         fetch("/users/api/" + name)
             .then(response => response.json())
             .then(data => {
-                console.log(data);
                 if(!data.error){
                     setUser(data);
                 }

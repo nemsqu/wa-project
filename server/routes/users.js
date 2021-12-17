@@ -12,13 +12,12 @@ const upload = multer({storage: multer.memoryStorage()});
 
 router.post('/api/login',
   (req, res, next) => {
-    console.log(req.body);
     User.findOne({name: req.body.name}, (err, user) =>{
     if(err) return res.send(err);
     if(!user) {
-      console.log("ei käyttäjää");
       return res.send({error: true});
     } else {
+      //check password and create token
       bcrypt.compare(req.body.password, user.password, (err, isMatch) => {
         if(err) return res.send(err);
         if(isMatch) {
@@ -34,12 +33,10 @@ router.post('/api/login',
             },
             (err, token) => {
               if(err) return res.send(err);
-              console.log(process.env.SECRET);
               res.json({success: true, token: token});
             }
           );
         } else {
-          console.log("ei match");
           res.send({error: true});
         }
       })
@@ -49,21 +46,20 @@ router.post('/api/login',
 
 router.post('/api/register', 
   (req, res) => {
-    console.log(req.body);
     if(req.body.name.trim().length <1){
       res.send({nameError: "Name is required"})
+      //check password length and contains
     } else if(req.body.password.trim().length < 8 || !req.body.password.match("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[-+_!@#$%^&*., ?])")){
-      console.log("fail");
-      res.send({passwordError: "Password is not strong enough."});
+      res.send({passwordError: "Password is not strong enough. Need to have at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character."});
     } else {
       User.findOne({name: req.body.name}, (err, user) => {
         if(err) {
-          console.log(err);
-          throw err
+          throw err;
         };
         if(user){
           return res.send({uniqueError: "Username already in use."});
         } else {
+          //generate salt and save salted password
           bcrypt.genSalt(10, (err, salt) => {
             bcrypt.hash(req.body.password, salt, (err, hash) => {
               if(err) throw err;
@@ -91,6 +87,7 @@ router.post('/api/register',
     } 
 });
 
+//add votes for a user
 router.get('/api/snippets/vote/:user/:snippet', passport.authenticate('jwt', { session: false }), (req, res) => {
   User.findOneAndUpdate({id: req.params.user}, {$push: {"commentVotes": req.params.snippet}}, {new: true}, (err, result) => {
     if(err) return res.send(err);
@@ -98,6 +95,7 @@ router.get('/api/snippets/vote/:user/:snippet', passport.authenticate('jwt', { s
   })
 })
 
+//get user's data
 router.get('/api/:name', (req, res) => {
   User.findOne({name: req.params.name}, (err, user) => {
     if(err) {
@@ -111,6 +109,7 @@ router.get('/api/:name', (req, res) => {
   })
 });
 
+//modify user's data, add new avatar if doesn't exist, return new data
 router.post('/api/:id', passport.authenticate('jwt', { session: false }), upload.single('avatar'), (req, res) => {
   Avatar.findOneAndUpdate({user: req.params.id}, {
     encoding: req.file.encoding,
@@ -142,6 +141,7 @@ router.post('/api/:id', passport.authenticate('jwt', { session: false }), upload
   }))
 });
 
+//update password
 router.post('/api/update/password/:id', passport.authenticate('jwt', { session: false }), (req, res) => {
   bcrypt.genSalt(10, (err, salt) => {
     bcrypt.hash(req.body.password, salt, (err, hash) => {
@@ -163,6 +163,7 @@ router.post('/api/update/password/:id', passport.authenticate('jwt', { session: 
   });
 });
 
+//check password matches old password
 router.post('/api/check/password', passport.authenticate('jwt', { session: false }), (req, res, next) => {
   User.findById(req.body.id, (err, user) =>{
   if(err) return res.send({error: err});
@@ -181,6 +182,7 @@ router.post('/api/check/password', passport.authenticate('jwt', { session: false
   })
 });
 
+//get user avatar
 router.get('/api/avatar/:name', (req, res) => {
   User.findOne({name: req.params.name}, (err, user) => {
     if(err) {
