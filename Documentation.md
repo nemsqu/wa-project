@@ -29,10 +29,11 @@ Installation guide
 2. Unzip the files to a folder which location you are aware of
 3. Open cmd
 4. Go to the folder where you unzipped the files
-5. Run "npm install"
-6. Run "npm start"
-7. Open your browser to http://localhost:1234
-8. Enjoy. :)
+5. Run "npm build"
+6. Run "npm install"
+7. Run "npm start"
+8. Open your browser to http://localhost:1234
+9. Enjoy.
 
 User manual
 =======
