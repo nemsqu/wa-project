@@ -25,15 +25,18 @@ For the back-end Node.js and Express were used because they work well together a
 Installation guide
 =======
 
-1. Download the files
-2. Unzip the files to a folder which location you are aware of
-3. Open cmd
-4. Go to the folder where you unzipped the files
-5. Run "npm build"
-6. Run "npm install"
-7. Run "npm start"
-8. Open your browser to http://localhost:1234
+1. Download the files.
+2. Unzip the files to a folder which location you are aware of.
+3. Open cmd.
+4. Go to the folder where you unzipped the files.
+5. Run "npm run build".
+6. Run "npm install".
+7. Run "npm start".
+8. Wait for the server to start and pen your browser to http://localhost:1234
 9. Enjoy.
+
+**In case of problems**
+If the application complains about dotenv make sure you have a .env file inside the server folder with a single parameter "SECRET" in it, e.g. "SECRET={your secret}".
 
 User manual
 =======
