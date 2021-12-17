@@ -1,7 +1,6 @@
 import { List, Pagination, Box, Stack } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { CustomListItem } from './CustomListItem';
-import { useUser } from '../context/AuthContext';
 import jwt_decode from "jwt-decode";
 import { SearchFieldComponent } from './SearchFieldComponent';
 
@@ -14,10 +13,9 @@ export function ListComponent({ list, title, onClick, loading, type, placeholder
     const [paginationNeeded, setPaginationNeeded] = useState(false);
     const [previousVotes, setPreviousVotes] = useState();
     const [editIcons, setEditIcons] = useState(true);
+    const [newVotes, setNewVotes] = useState(true);
+    const user = jwt_decode(localStorage.getItem("token"));
 
-    let user = useUser();
-
-    //näitä hyödyntäen listan update vaan sivua vaihtaessa?
     const handleChange = (e, value) => {
         setPage({...page, current: value});
         setSubList(filteredList.slice(0+value*10-10, 10+value*10-10));
@@ -28,8 +26,10 @@ export function ListComponent({ list, title, onClick, loading, type, placeholder
     }, [loading])
 
     useEffect(() => {
+        console.log("FIRED");
+        console.log(user);
         if(user){
-            fetch("/api/" + user._id + "/votes")
+            fetch("/api/" + user.id + "/votes")
             .then(response => response.json())
             .then(data => {
                 console.log("new list haettu ");
@@ -38,7 +38,11 @@ export function ListComponent({ list, title, onClick, loading, type, placeholder
         }
         setFilteredList(list);
         setFullList(list);
-    }, [])
+    }, [newVotes])
+
+    const onVote = () => {
+        setNewVotes(true);
+    }
 
     useEffect(() => {
         if(filteredList.length > 10){
@@ -65,8 +69,6 @@ export function ListComponent({ list, title, onClick, loading, type, placeholder
         }
     }
 
-    console.log(subList);
-
 
     return(
         <>
@@ -78,8 +80,9 @@ export function ListComponent({ list, title, onClick, loading, type, placeholder
                 {paginationNeeded && <Pagination count={page.max} page={page.current} onChange={handleChange} sx={{textAlign: 'center', width:'100%', justifyContent: 'center', display:'flex'}}/>}
                 {!loading && <List >
                     {subList.map((element) => {
-                    return <CustomListItem key={element._id} onClick={onClick} listElement={element} type={type} previousVotes={previousVotes} onVote={setPreviousVotes} user={user} toggleEditIcons={toggleEditIcons} editIcons={editIcons} />;
+                    return <CustomListItem key={element._id} onClick={onClick} listElement={element} type={type} previousVotes={previousVotes} onVote={onVote} user={user} toggleEditIcons={toggleEditIcons} editIcons={editIcons} />;
                     })}
+                {type === "code" && list.length === 0 && <p>No snippets yet.</p>}
                 </List>}
             </Box>
         </>

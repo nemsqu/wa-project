@@ -33,7 +33,7 @@ export function ProfileComponent(){
 
     const updateUserData = (e) => {
         e.preventDefault();
-        console.log(e.target.avatarUpload.files[0]);
+        const token = localStorage.getItem("token");
         const formData = new FormData();
         formData.append("name", e.target.name.value);
         formData.append("email", e.target.email.value);
@@ -43,6 +43,9 @@ export function ProfileComponent(){
         fetch("/users/api/" + userData._id, {
             method: "POST",
             body: formData,
+            headers: {
+                "Authorization": "Bearer " + token
+            },
             mode: 'cors'
           }).then((response) => response.json())
           .then(data => {
@@ -63,11 +66,12 @@ export function ProfileComponent(){
         setConfirmError(false);
         setError(false);
         e.preventDefault();
-        console.log(userData._id);
+        const token = localStorage.getItem("token");
         fetch("/users/api/check/password", {
             method: "POST",
             headers: {
-              "Content-type": "application/json"
+              "Content-type": "application/json",
+              "Authorization": "Bearer " + token
             },
             body: JSON.stringify({"id": userData._id, "password": e.target.oldpassword.value}),
             mode: 'cors'

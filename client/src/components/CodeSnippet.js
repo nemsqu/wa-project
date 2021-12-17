@@ -21,7 +21,7 @@ export function CodeSnippet(){
 
     useEffect(() => {
         if(snippet){
-            if(user._id === snippet.authorID){
+            if(user.name === snippet.authorName){
                 setCanEdit(true);
             } else {
                 setCanEdit(false);
@@ -57,11 +57,12 @@ export function CodeSnippet(){
     const onSubmit = (comment) => {
         setAddingComment(true);
         let newComment = {"authorID": user.id, "authorName": user.name, "content": comment, "snippet": id, "_id": ""};
-        console.log("CODE SNIPPET " + user.id + ", " + user.name);
+        const token = localStorage.getItem("token");
         fetch("/api/comment/" + id, {
             method: "POST",
             headers: {
-                "Content-type": "application/json"
+                "Content-type": "application/json",
+                "Authorization": "Bearer " + token
             },
             body: JSON.stringify(newComment),
             mode: 'cors'

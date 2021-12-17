@@ -25,16 +25,13 @@ function App() {
   const [loggedin, setLoggedin] = useState(false);
   let user = useUser(); 
 
-  useEffect(() => {
-    setLoggedin(user);
-  }, [user])
-
   const logout = () => {
     console.log("loging out");
     if(window.location.href = "/edit/profile"){
       window.location.href = "/"
     }
     localStorage.removeItem("token");
+    setLoggedin(false);
     updateUser();
   }
 
@@ -53,18 +50,21 @@ function App() {
         console.log(data);
         setSnippets(data);
         setLoading(false);
+        if(localStorage.getItem("token")){
+          setLoggedin(true);
+        }
     }
     fetchData();
 }, [])
 
   const onSubmitCode = (e) => {
     e.preventDefault();
-    console.log(e.target.input.value);
-    console.log("submitting")
+    const token = localStorage.getItem("token");
     fetch("/api/snippet", {
       method: "POST",
       headers: {
-        "Content-type": "application/json"
+        "Content-type": "application/json",
+        "Authorization": "Bearer " + token
       },
       body: JSON.stringify({"authorID": user.id, "authorName": user.name, "content": e.target.input.value, "title": e.target.title.value}),
       mode: 'cors'
@@ -79,7 +79,7 @@ function App() {
     <Router>
       <Header title={"Code snippet app"} onLogout={logout} loggedin={loggedin} />
       <Routes>
-        <Route path="/" element={<FrontPage />} />
+        <Route path="/" element={<FrontPage login={setLoggedin} />} />
         <Route path="/add_snippet" element={<SnippetAdditionComponent onSubmit={onSubmitCode} loading={loading}/>} />
         <Route path="/list" element={<ListComponent list={snippets} />} />
         <Route path="/login" element={<LoginForm />} />

@@ -3,8 +3,9 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var mongoose = require("mongoose")
-var cors = require('cors')
+var mongoose = require("mongoose");
+var cors = require('cors');
+const passport = require('passport');
 
 
 var indexRouter = require('./routes/index');
@@ -17,11 +18,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(passport.initialize());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-const mongoDB = "mongodb://localhost:27017/projectdb";
+const mongoDB = "mongodb://localhost:27017/projectdb_2";
 mongoose.connect(mongoDB);
 mongoose.Promise = Promise;
 const db = mongoose.connection;

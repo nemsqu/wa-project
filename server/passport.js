@@ -9,7 +9,7 @@ passport.use(new JWTStrategy({
 },
 function (jwtPayload, done) {
     
-    User.findOne({email: jwtPayload.email}, function (err, user) {
+    User.findOne({name: jwtPayload.name}, function (err, user) {
         if (err) {
             return done(err, false);
         }

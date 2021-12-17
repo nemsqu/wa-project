@@ -1,3 +1,4 @@
+import { Button, TextField, Box } from "@mui/material";
 import { useState } from "react";
 import { useUpdateUser } from '../context/AuthContext';
 
@@ -5,6 +6,13 @@ import { useUpdateUser } from '../context/AuthContext';
 export function LoginForm(){
     const [error, setError] = useState(null);
     const updateUser = useUpdateUser();
+    const [inputs, setInputs] = useState({name: "", password: ""});
+
+    const handleChange = (e) => {
+      setError(null);
+      setInputs({...inputs, [e.target.name]: e.target.value});
+      console.log(inputs);
+    }
 
     const userLogin = (e) => {
         e.preventDefault();
@@ -14,22 +22,17 @@ export function LoginForm(){
           headers: {
             "Content-type": "application/json"
           },
-          body: JSON.stringify({"email": e.target.email.value, "password": e.target.password.value}),
+          body: JSON.stringify(inputs),
           mode: 'cors'
       })
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
           if(data.token) {
-              console.log("moi");
-              //onSuccess(data.token);
-              //setContext(currentValues => ({...currentValues, token: data.token}));
+              console.log(data.token);
               localStorage.setItem("token", data.token);
               updateUser();
-              //getIndex(data.token);
               //window.location.href = '/';
-              //console.log(localStorage.getItem("token"));
-              
           } else {
               console.log("wtf");
               if(data.error) {
@@ -42,14 +45,14 @@ export function LoginForm(){
       }
 
     return(
-        <div>
+        <Box sx={{m: "10px"}}>
             <h3>Login</h3>
             <p>{error ? error : ""}</p>
             <form onSubmit={userLogin}>
-                <input type="email" placeholder="Email" name="email"></input>
-                <input type="password" placeholder="Password" name="password"></input>
-                <input type="submit" />
+                <TextField type="text" onChange={handleChange} label="Username" sx={{mx: "10px", my: "5px"}}placeholder="Username" name="name"></TextField>
+                <TextField type="password" onChange={handleChange} label="Password" sx={{mx: "10px", my: "5px"}} placeholder="Password" name="password"></TextField>
+                <Button onClick={userLogin} sx={{mx: "10px", my: "15px"}} variant="outlined">Login</Button>
             </form>
-        </div>
+        </Box>
     );
 }

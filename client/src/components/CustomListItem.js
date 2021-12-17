@@ -3,10 +3,10 @@ import { CodeHiglightComponent } from './CodeHighlightComponent';
 import { VoteCounter} from './VoteCounter';
 import { useEffect, useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
-import { useUser } from '../context/AuthContext';
 import { Box } from '@mui/system';
 import Avatar from '@mui/material/Avatar';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import jwt_decode from 'jwt-decode';
 
 export function CustomListItem({ listElement, onClick, type, previousVotes, onVote, toggleEditIcons, editIcons}){
     const [canEdit, setCanEdit] = useState(false);
@@ -15,14 +15,15 @@ export function CustomListItem({ listElement, onClick, type, previousVotes, onVo
     const [element, setElement] = useState(listElement);
     const [edited, setEdited] = useState(listElement.edited);
     const [avatarSrc, setAvatarSrc] = useState("");
-    const user = useUser();
+    const [canVote, setCanVote] = useState(false);
+    const user = jwt_decode(localStorage.getItem("token"));
+    console.log(canVote);
 
     useEffect(() => {
         let mounted = true;
         fetch("/users/api/profile/" + element.authorName)
             .then(response => response.blob())
             .then(data => {
-                console.log(data);
                 if(!data.error){
                     if(mounted){
                         setAvatarSrc(URL.createObjectURL(data));
@@ -35,12 +36,15 @@ export function CustomListItem({ listElement, onClick, type, previousVotes, onVo
     }, [])
 
     useEffect(() => {
-        if(user._id === element.authorID){
+        console.log(user.id);
+        console.log(element);
+        if(user.name === element.authorName){
             setCanEdit(true);
         } else {
             setCanEdit(false);
         }
-    }, [user, editMode])
+    }, [editMode])
+
 
     const openForEditing = () => {
         setEditMode(true);
@@ -52,10 +56,12 @@ export function CustomListItem({ listElement, onClick, type, previousVotes, onVo
     }
 
     const saveComment = () => {
+        const token = localStorage.getItem("token");
         fetch("/api/edit/comment/" + element._id, {
             method: "POST",
             headers: {
-                "Content-type": "application/json"
+                "Content-type": "application/json",
+                "Authorization": "Bearer " + token
             },
             body: JSON.stringify({"content": comment}),
             mode: 'cors'
@@ -68,6 +74,56 @@ export function CustomListItem({ listElement, onClick, type, previousVotes, onVo
         })
     }
 
+    useEffect(() => {
+        console.log(canVote);
+        if(!previousVotes){
+            console.log("hep");
+            setCanVote(true);
+        }else{
+            console.log(previousVotes);
+            if(type === "comment"){
+                if(previousVotes.commentVotes.filter(v => v === element._id).length === 0){
+                    setCanVote(true);
+                } else {
+                    setCanVote(false);
+                }
+                console.log(canVote);
+            }else{
+                if(previousVotes.snippetVotes.filter(v => v === element._id).length === 0){
+                    setCanVote(true);
+                }else {
+                    setCanVote(false);
+                }
+                console.log(canVote);
+            }
+        }
+    }, [previousVotes])
+
+    const updatePreviousVotes = () => {
+        console.log("updating");
+        onVote();
+            if(!previousVotes){
+                setCanVote(true);
+            }else{
+                console.log(previousVotes);
+                if(type === "comment"){
+                    if(previousVotes.commentVotes.filter(v => v === element._id).length === 0){
+                        setCanVote(true);
+                    } else {
+                        setCanVote(false);
+                    }
+                }else{
+                    if(previousVotes.snippetVotes.filter(v => v === element._id).length === 0){
+                        setCanVote(true);
+                    }else {
+                        setCanVote(false);
+                    }
+                }
+            }
+            console.log(previousVotes);
+    }
+
+    console.log(previousVotes);
 
     if(type === "comment" && !editMode){
         return(<>
@@ -87,7 +143,7 @@ export function CustomListItem({ listElement, onClick, type, previousVotes, onVo
                     </Tooltip>}/>
             {element.edited && <Typography component="span" color="#A9A9A9" sx={{ fontSize: "0.6em", marginRigth: "20vw"}}>Edited {edited}</Typography>}
             {canEdit && editIcons && <EditIcon onClick={openForEditing} />}
-            <VoteCounter votes={element.votes} id={element._id} previousVotes={previousVotes} onVote={onVote} type={type} />
+            <VoteCounter votes={element.votes} id={element._id} canVote={canVote} onVote={updatePreviousVotes} type={type} setCanVote={setCanVote} />
         </ListItem >
         <Divider variant="inset" />
         </>)
@@ -112,7 +168,7 @@ export function CustomListItem({ listElement, onClick, type, previousVotes, onVo
                     <CodeHiglightComponent onClick={() => onClick(element._id)} code={element.content} /> 
                 </>} />
                 <Typography component="span"/>
-                <VoteCounter votes={element.votes} id={element._id} previousVotes={previousVotes} onVote={onVote} type={type} />
+                <VoteCounter votes={element.votes} id={element._id} canVote={canVote} onVote={updatePreviousVotes} type={type} setCanVote={setCanVote}/>
             </ListItem >
             {element.edited && <Typography color="#A9A9A9" sx={{ fontSize: "small"}}>Edited {edited}</Typography>}
             </Box>)

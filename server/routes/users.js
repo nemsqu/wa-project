@@ -6,13 +6,15 @@ const User = require("../models/User");
 const Avatar = require("../models/Avatar");
 const jwt = require("jsonwebtoken");
 const passport = require('passport');
+var passportFile = require('../passport.js');
 const multer = require('multer');
 const upload = multer({storage: multer.memoryStorage()});
 
 
 router.post('/api/login',
   (req, res, next) => {
-    User.findOne({email: req.body.email}, (err, user) =>{
+    console.log(req.body);
+    User.findOne({name: req.body.name}, (err, user) =>{
     if(err) return res.send(err);
     if(!user) {
       console.log("ei käyttäjää");
@@ -90,7 +92,7 @@ router.post('/api/register',
     } 
 });
 
-router.get('/api/snippets/vote/:user/:snippet', (req, res) => {
+router.get('/api/snippets/vote/:user/:snippet', passport.authenticate('jwt', { session: false }), (req, res) => {
   User.findOneAndUpdate({id: req.params.user}, {$push: {"commentVotes": req.params.snippet}}, {new: true}, (err, result) => {
     if(err) return res.send(err);
     return res.send("ok");
@@ -110,7 +112,7 @@ router.get('/api/:name', (req, res) => {
   })
 });
 
-router.post('/api/:id', upload.single('avatar'), (req, res) => {
+router.post('/api/:id', passport.authenticate('jwt', { session: false }), upload.single('avatar'), (req, res) => {
   Avatar.findOneAndUpdate({user: req.params.id}, {
     encoding: req.file.encoding,
     mimetype: req.file.mimetype,
@@ -141,7 +143,7 @@ router.post('/api/:id', upload.single('avatar'), (req, res) => {
   }))
 });
 
-router.post('/api/update/password/:id', (req, res) => {
+router.post('/api/update/password/:id', passport.authenticate('jwt', { session: false }), (req, res) => {
   bcrypt.genSalt(10, (err, salt) => {
     bcrypt.hash(req.body.password, salt, (err, hash) => {
       if(err) throw err;
@@ -157,11 +159,12 @@ router.post('/api/update/password/:id', (req, res) => {
           return res.send("No comments found");
         }
       }))
+      
     });
   });
 });
 
-router.post('/api/check/password', (req, res, next) => {
+router.post('/api/check/password', passport.authenticate('jwt', { session: false }), (req, res, next) => {
   User.findById(req.body.id, (err, user) =>{
   if(err) return res.send({error: err});
   if(!user) {

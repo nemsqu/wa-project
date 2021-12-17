@@ -4,6 +4,7 @@ const { check, validationResult } = require('express-validator');
 const Snippet = require('../models/Snippet');
 const Comment = require('../models/Comment');
 const User = require('../models/User');
+const passport = require('passport');
 
 
 router.get('/api/snippets', function(req, res, next) {
@@ -20,7 +21,7 @@ router.get('/api/snippets', function(req, res, next) {
   })
 });
 
-router.post('/api/snippet', [
+router.post('/api/snippet', passport.authenticate('jwt', { session: false }), [
   check('content').escape(),
   check('title').escape(),
   ], function(req, res, next) {
@@ -42,7 +43,7 @@ router.post('/api/snippet', [
     });
 });
 
-router.post('/api/snippet/:id', [
+router.post('/api/snippet/:id', passport.authenticate('jwt', { session: false }), [
   check('content').escape(),
   check('title').escape(),
   ], function(req, res, next) {
@@ -60,7 +61,7 @@ router.post('/api/snippet/:id', [
     }));
 });
 
-router.post('/api/edit/comment/:id', function(req, res, next) {
+router.post('/api/edit/comment/:id', passport.authenticate('jwt', { session: false }), function(req, res, next) {
   const timeNow = Date(Date.now());
   const datetime = timeNow.slice().split("GMT");
     Comment.findOneAndUpdate({_id: req.params.id}, {"content": req.body.content, "edited": datetime[0]}, {new: true}, ((err, result) => {
@@ -69,7 +70,7 @@ router.post('/api/edit/comment/:id', function(req, res, next) {
     }));
 });
 
-router.post('/api/comment/:code', function(req, res, next) {
+router.post('/api/comment/:code', passport.authenticate('jwt', { session: false }), function(req, res, next) {
   new Comment({
     authorID: req.body.authorID,
     authorName: req.body.authorName,
@@ -83,7 +84,7 @@ router.post('/api/comment/:code', function(req, res, next) {
   });
 });
 
-router.post('/api/comment/vote/:user/:comment/:votes', function(req, res, next) {
+router.post('/api/comment/vote/:user/:comment/:votes', passport.authenticate('jwt', { session: false }), function(req, res, next) {
   Comment.findOneAndUpdate({_id: req.params.comment}, {votes: req.params.votes}, {new: true}, ((err, result) => {
     if(err) return res.send(err);
     User.findOneAndUpdate({id: req.params.user}, {$push: {commentVotes: req.params.comment}}, {new: true}, (err, result) => {
@@ -94,7 +95,7 @@ router.post('/api/comment/vote/:user/:comment/:votes', function(req, res, next) 
   }));
 });
 
-router.post('/api/snippet/vote/:user/:snippet/:votes', function(req, res, next) {
+router.post('/api/snippet/vote/:user/:snippet/:votes', passport.authenticate('jwt', { session: false }), function(req, res, next) {
   Snippet.findOneAndUpdate({_id: req.params.snippet}, {votes: req.params.votes}, {new: true}, ((err, result) => {
     if(err) return res.send(err);
     User.findOneAndUpdate({id: req.params.user}, {$push: {snippetVotes: req.params.snippet}}, {new: true}, (err, result) => {

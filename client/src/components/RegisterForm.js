@@ -1,19 +1,25 @@
 import { useState } from "react";
+import { Button, TextField, Box } from "@mui/material";
 
 export function RegisterForm(){
     const [error, setError] = useState(null);
+    const [inputs, setInputs] = useState({name: "", email: "", password: ""});
+
+    const handleChange = (e) => {
+      setError(null);
+      setInputs({...inputs, [e.target.name]: e.target.value})
+    }
 
     const userRegister = (e) => {
         e.preventDefault();
         setError(null);
-        let content = JSON.stringify({"name": e.target.name.value, "email": e.target.email.value, "password": e.target.password.value});
-        console.log(content);
+        
         fetch("/users/api/register", {
           method: "POST",
           headers: {
             "Content-type": "application/json"
           },
-          body: content,
+          body: JSON.stringify(inputs),
           mode: 'cors'
       })
       .then((response) => response.json())
@@ -32,15 +38,15 @@ export function RegisterForm(){
       }
     console.log(error);
     return(
-        <div>
+        <Box sx={{m: "10px"}}>
             <h3>Register</h3>
             <p>{error}</p>
             <form onSubmit={userRegister}>
-                <input type="text" placeholder="username" name="name"></input>
-                <input type="email" placeholder="Email" name="email"></input>
-                <input type="password" placeholder="Password" name="password"></input>
-                <input type="submit" />
+                <TextField type="text" onChange={handleChange} placeholder="username" name="name" sx={{mx: "10px", my: "5px"}} required></TextField>
+                <TextField type="email" onChange={handleChange} placeholder="Email" name="email" sx={{mx: "10px", my: "5px"}} required></TextField>
+                <TextField type="password" onChange={handleChange} placeholder="Password" name="password" sx={{mx: "10px", my: "5px"}} required></TextField>
+                <Button variant="outlined" sx={{mx: "10px", my: "15px"}} onClick={userRegister}>Register</Button>
             </form>
-        </div>
+        </Box>
     );
 }

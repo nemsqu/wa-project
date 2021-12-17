@@ -6,7 +6,7 @@ import { ListComponent } from './ListComponent';
 import { useState, useEffect } from 'react';
 
 
-export function FrontPage(){
+export function FrontPage({login}){
 
     const token = localStorage.getItem("token");
     const [snippets, setSnippets] = useState([]);
@@ -14,6 +14,9 @@ export function FrontPage(){
 
     useEffect(() => {
         setLoading(true);
+        if(localStorage.getItem("token")){
+            login(true);
+        }
         fetch("/api/snippets")
         .then(response => {
             console.log(response);

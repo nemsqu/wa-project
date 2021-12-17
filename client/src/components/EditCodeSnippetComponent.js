@@ -32,11 +32,12 @@ export function EditCodeSnippetComponent(){
     }
 
     const onSubmit = () => {
-        console.log(snippet.content);
+        const token = localStorage.getItem("token");
         fetch("/api/snippet/" + id, {
             method: "POST",
             headers: {
-              "Content-type": "application/json"
+              "Content-type": "application/json",
+              "Authorization": "Bearer " + token
             },
             body: JSON.stringify({"content": snippet.content, "title": snippet.title}),
             mode: 'cors'
@@ -59,7 +60,7 @@ export function EditCodeSnippetComponent(){
                 {!loading && <form onChange={handleChange}>
                     <p>{message}</p>
                     <TextField type="text" name="title" label="Title" sx={{width: 500, maxWidth: "90vw"}}  defaultValue={snippet.title} margin="normal"/><br/>
-                    <TextField name="content" label="snippet" defaultValue={snippet.content} sx={{maxRows: 20, width: 500, maxWidth: "90vw"}} margin="normal" multiline></TextField><br/>
+                    <TextField name="content" label="snippet" defaultValue={snippet.content} maxRows="20" sx={{ width: 500, maxWidth: "90vw"}} margin="normal" multiline></TextField><br/>
                     <Button variant="outlined" onClick={onSubmit}>Save</Button>
                 </form>}
             </Box>
